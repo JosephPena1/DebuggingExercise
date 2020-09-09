@@ -4,8 +4,16 @@ using System.Text;
 
 namespace HelloWorld
 {
+    struct player
+    {
+        public string Name;
+        public int Health;
+        public int Damage;
+        public int Defense;
+    }
     class Game      //WIP: switching between enemies.
     {
+        player player;
         bool _gameOver = false;
         string _playerName = "Hero";
         int _playerHealth = 120;
@@ -33,7 +41,7 @@ namespace HelloWorld
             int enemyAttack = 0;
             int enemyDefense = 0;
             string enemyName = "";
-            //Changes the enemy's default stats based on our current room number. 
+            //Changes the enemy's default stats based on our current room number.
             //This is how we make it seem as if the player is fighting different enemies
             switch (roomNum)
             {
@@ -61,13 +69,21 @@ namespace HelloWorld
                         enemyName = "Giant";
                         break;
                     }
+                case 3:
+                    {
+                        enemyHealth = 20000;
+                        enemyAttack = 100;
+                        enemyDefense = 20;
+                        enemyName = "Goliath";
+                        break;
+                    }
             }
 
             //Loops until the player or the enemy is dead
-            while (_playerHealth > 0 && enemyHealth > 0)
+            while (player.Health > 0 && enemyHealth > 0)
             {
                 //Displays the stats for both charactersa to the screen before the player takes their turn
-                PrintStats(_playerName, _playerHealth, _playerDamage, _playerDefense);
+                PrintStats(player);
                 PrintStats(enemyName, enemyHealth, enemyAttack, enemyDefense);
 
                 //Get input from the player
@@ -80,6 +96,14 @@ namespace HelloWorld
                     Console.WriteLine("\nYou dealt " + (_playerDamage - enemyDefense) + " damage.");
                     Console.Write("> ");
                     Console.ReadKey();
+                    if (enemyHealth <= 0)
+                    {
+                        turnCount++;
+                        Console.Clear();
+                        Console.WriteLine(enemyName + " has been slain.");
+                        Console.ReadKey();
+                        break;
+                    }
                 }
                 //If the player decides to defend the enemy just takes their turn. However this time the block attack function is
                 //called instead of simply decrementing the health by the enemy's attack value.
@@ -130,6 +154,9 @@ namespace HelloWorld
         }
         void UpgradeStats(int turnCount, string query)
         {
+            Random random;
+            random = new Random();
+            int randomNumber = random.Next(0, 10);
             Console.WriteLine(query);
             //Subtract the amount of turns from our maximum level scale to get our current level scale
             int scale = levelScaleMax - turnCount;
@@ -138,16 +165,33 @@ namespace HelloWorld
                 scale = 1;
             }
             char input;
-            GetInput(out input, "Attack Up", "Defense Up","what would you like to buy?");
+            GetInput(out input, "Attack Up", "Defense Up", "Heal", "what would you like to buy?");
             if (input == '1')
             {
-                _playerDamage *= 2 * scale;
+                player.Damage *= 2 * scale;
             }
             else if (input == '2')
             {
-                _playerDefense *= 2 * scale;
+                player.Defense *= 2 * scale;
             }
-            _playerHealth += 10 * scale;
+            else if (input == '3')
+            {
+                if (randomNumber > 5)
+                {
+                    Console.Clear();
+                    player.Health += 50;
+                    Console.WriteLine("you healed 50 health");
+                    Console.ReadKey();
+                }
+                else
+                {
+                    Console.Clear();
+                    player.Health += 25;
+                    Console.WriteLine("you healed 25 health");
+                    Console.ReadKey();
+                }
+            }
+            player.Health += 10 * scale;
             Console.Clear();
         }
         //Gets input from the player
@@ -192,6 +236,14 @@ namespace HelloWorld
             Console.WriteLine("Defense: " + defense);
         }
 
+        void PrintStats(player player)
+        {
+            Console.WriteLine("\n" + player.Name);
+            Console.WriteLine("Health: " + player.Health);
+            Console.WriteLine("Damage: " + player.Damage);
+            Console.WriteLine("Defense: " + player.Defense);
+        }
+
         //This is used to progress through our game. A recursive function meant to switch the rooms and start the battles inside them.
         void ClimbLadder(int roomNum)
         {
@@ -213,6 +265,11 @@ namespace HelloWorld
                         Console.WriteLine("A giant has appeared!");
                         break;
                     }
+                case 3:
+                    {
+                        Console.WriteLine("A goliath has appeared!");
+                        break;
+                    }
                 default:
                     {
                         _gameOver = true;
@@ -223,7 +280,7 @@ namespace HelloWorld
             //Starts a battle. If the player survived the battle, level them up and then proceed to the next room.
             if (StartBattle(roomNum, ref turnCount))
             {
-                if (roomNum == 2)
+                if (roomNum == 3)
                 {
                     return;
                 }
@@ -264,26 +321,26 @@ namespace HelloWorld
                 {
                     case '1':
                         {
-                            _playerName = "Sir Kibble";
-                            _playerHealth = 120;
-                            _playerDefense = 10;
-                            _playerDamage = 40;
+                            player.Name = "Sir Kibble";
+                            player.Health = 120;
+                            player.Defense = 10;
+                            player.Damage = 40;
                             break;
                         }
                     case '2':
                         {
-                            _playerName = "Gnojoel";
-                            _playerHealth = 40;
-                            _playerDefense = 2;
-                            _playerDamage = 70;
+                            player.Name = "Gnojoel";
+                            player.Health = 40;
+                            player.Defense = 2;
+                            player.Damage = 70;
                             break;
                         }
                     case '3':
                         {
-                            _playerName = "Joedazz";
-                            _playerHealth = 200;
-                            _playerDefense = 5;
-                            _playerDamage = 25;
+                            player.Name = "Joedazz";
+                            player.Health = 200;
+                            player.Defense = 5;
+                            player.Damage = 25;
                             break;
                         }
                     //If an invalid input is selected display and input message and input over again.
