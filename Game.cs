@@ -4,7 +4,7 @@ using System.Text;
 
 namespace HelloWorld
 {
-    class Game      //things to fix: switch between enemies. -_-
+    class Game      //WIP: switching between enemies.
     {
         bool _gameOver = false;
         string _playerName = "Hero";
@@ -72,13 +72,12 @@ namespace HelloWorld
 
                 //Get input from the player
                 char input;
-                GetInput(out input, "Attack", "Defend");
+                GetInput(out input, "Attack", "Defend", "what do you do?");
                 //If input is 1, the player wants to attack. By default the enemy blocks any incoming attack
                 if (input == '1')
                 {
-                    BlockAttack(enemyHealth, _playerDamage, enemyDefense);
-                    enemyHealth -= _playerDamage;
-                    Console.WriteLine("\nYou dealt " + _playerDamage + " damage.");
+                    BlockAttack(ref enemyHealth, _playerDamage, enemyDefense);
+                    Console.WriteLine("\nYou dealt " + (_playerDamage - enemyDefense) + " damage.");
                     Console.Write("> ");
                     Console.ReadKey();
                 }
@@ -86,11 +85,10 @@ namespace HelloWorld
                 //called instead of simply decrementing the health by the enemy's attack value.
                 else if (input == '2')
                 {
-                    BlockAttack(_playerHealth, enemyAttack, _playerDefense);
-                    Console.WriteLine("\n" + enemyName + " dealt " + enemyAttack + " damage.");
+                    BlockAttack(ref _playerHealth, enemyAttack, _playerDefense);
+                    Console.WriteLine("\n" + enemyName + " dealt " + (enemyAttack - _playerDefense) + " damage.");
                     Console.Write("> ");
                     Console.ReadKey();
-                    turnCount++;
                     Console.Clear();
                     continue;
                 }
@@ -100,26 +98,25 @@ namespace HelloWorld
                 Console.Write("> ");
                 Console.ReadKey();
                 Console.Clear();
-                //turnCount++;
+                turnCount++;
 
             }
-            LevelUp(turnCount);
             //Return whether or not our player died
             return _playerHealth != 0;
 
         }
         //Decrements the health of a character. The attack value is subtracted by that character's defense
-        int BlockAttack(int opponentHealth, int attackVal, int opponentDefense)
+        int BlockAttack(ref int opponentHealth, int attackVal, int opponentDefense)
         {
             int damage = attackVal - opponentDefense;
-            if (damage > 0)
+            if (damage <= 0)
             {
                 damage = 0;
             }
             return opponentHealth -= damage;
         }
         //Scales up the player's stats based on the amount of turns it took in the last battle
-        void LevelUp(int turnCount)
+        void UpgradeStats(int turnCount)
         {
             //Subtract the amount of turns from our maximum level scale to get our current level scale
             int scale = levelScaleMax - turnCount;
@@ -131,18 +128,56 @@ namespace HelloWorld
             _playerDamage *= scale;
             _playerDefense *= scale;
         }
+        void UpgradeStats(int turnCount, string query)
+        {
+            Console.WriteLine(query);
+            //Subtract the amount of turns from our maximum level scale to get our current level scale
+            int scale = levelScaleMax - turnCount;
+            if (scale <= 0)
+            {
+                scale = 1;
+            }
+            char input;
+            GetInput(out input, "Attack Up", "Defense Up","what would you like to buy?");
+            if (input == '1')
+            {
+                _playerDamage *= 2 * scale;
+            }
+            else if (input == '2')
+            {
+                _playerDefense *= 2 * scale;
+            }
+            _playerHealth += 10 * scale;
+            Console.Clear();
+        }
         //Gets input from the player
         //Out's the char variable given. This variables stores the player's input choice.
         //The parameters option1 and option 2 displays the players current chpices to the screen
-        void GetInput(out char input, string option1, string option2)
+        void GetInput(out char input, string option1, string option2, string query)
         {
             //Initialize input
             input = ' ';
+            Console.WriteLine(query);
             //Loop until the player enters a valid input
             while (input != '1' && input != '2')
             {
                 Console.WriteLine("1." + option1);
                 Console.WriteLine("2." + option2);
+                Console.Write("> ");
+                input = Console.ReadKey().KeyChar;
+            }
+        }
+        void GetInput(out char input, string option1, string option2, string option3, string query)
+        {
+            //Initialize input
+            input = ' ';
+            Console.WriteLine(query);
+            //Loop until the player enters a valid input
+            while (input != '1' && input != '2' && input != '3')
+            {
+                Console.WriteLine("1." + option1);
+                Console.WriteLine("2." + option2);
+                Console.WriteLine("3." + option3);
                 Console.Write("> ");
                 input = Console.ReadKey().KeyChar;
             }
@@ -188,8 +223,23 @@ namespace HelloWorld
             //Starts a battle. If the player survived the battle, level them up and then proceed to the next room.
             if (StartBattle(roomNum, ref turnCount))
             {
-                LevelUp(turnCount);
-                ClimbLadder(roomNum++);
+                if (roomNum == 2)
+                {
+                    return;
+                }
+                //char input;
+                GetInput(out char input, "continue", "visit shop", "before continuing on, would you like to visit the shop?");
+                if (input == '1')
+                {
+                    Console.Clear();
+                    UpgradeStats(turnCount);
+                }
+                else if (input == '2')
+                {
+                    Console.Clear();
+                    UpgradeStats(turnCount, "you enter the shop");
+                }
+                ClimbLadder(roomNum + 1);
             }
             _gameOver = true;
 
