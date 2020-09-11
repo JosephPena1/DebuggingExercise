@@ -92,8 +92,8 @@ namespace HelloWorld
                 //If input is 1, the player wants to attack. By default the enemy blocks any incoming attack
                 if (input == '1')
                 {
-                    BlockAttack(ref enemyHealth, _playerDamage, enemyDefense);
-                    Console.WriteLine("\nYou dealt " + (_playerDamage - enemyDefense) + " damage.");
+                    BlockAttack(ref enemyHealth, player.Damage, enemyDefense);
+                    Console.WriteLine("\nYou dealt " + (player.Damage - enemyDefense) + " damage.");
                     Console.Write("> ");
                     Console.ReadKey();
                     if (enemyHealth <= 0)
@@ -109,15 +109,15 @@ namespace HelloWorld
                 //called instead of simply decrementing the health by the enemy's attack value.
                 else if (input == '2')
                 {
-                    BlockAttack(ref _playerHealth, enemyAttack, _playerDefense);
-                    Console.WriteLine("\n" + enemyName + " dealt " + (enemyAttack - _playerDefense) + " damage.");
+                    BlockAttack(ref player.Health, enemyAttack, player.Defense);
+                    Console.WriteLine("\n" + enemyName + " dealt " + (enemyAttack - player.Defense) + " damage.");
                     Console.Write("> ");
                     Console.ReadKey();
                     Console.Clear();
                     continue;
                 }
                 //After the player attacks, the enemy takes its turn. Since the player decided not to defend, the block attack function is not called.
-                _playerHealth -= enemyAttack;
+                player.Health -= enemyAttack;
                 Console.WriteLine(enemyName + " dealt " + enemyAttack + " damage.");
                 Console.Write("> ");
                 Console.ReadKey();
@@ -148,9 +148,9 @@ namespace HelloWorld
             {
                 scale = 1;
             }
-            _playerHealth += 10 * scale;
-            _playerDamage *= scale;
-            _playerDefense *= scale;
+            player.Health += 10 * scale;
+            player.Damage *= scale;
+            player.Defense *= scale;
         }
         void UpgradeStats(int turnCount, string query)
         {
@@ -355,7 +355,7 @@ namespace HelloWorld
                 Console.Clear();
             }
             //Prints the stats of the choosen character to the screen before the game begins to give the player visual feedback
-            PrintStats(_playerName, _playerHealth, _playerDamage, _playerDefense);
+            PrintStats(player);
             Console.WriteLine("Press any key to continue.");
             Console.Write("> ");
             Console.ReadKey();
@@ -378,7 +378,7 @@ namespace HelloWorld
         public void End()
         {
             //If the player died print death message
-            if (_playerHealth <= 0)
+            if (player.Health <= 0)
             {
                 Console.WriteLine("Failure");
                 return;
